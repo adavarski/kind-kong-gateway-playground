@@ -5,6 +5,7 @@ This guide introduces anyone who is interested in doing local hands-on experienc
 
 - [Docker](https://docs.docker.com/engine/install/ubuntu/)
 - [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
+- [k3d](https://k3d.io/#installation)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - [Helm](https://helm.sh/docs/intro/install/)
 
