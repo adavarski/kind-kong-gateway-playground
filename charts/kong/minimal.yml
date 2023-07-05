@@ -46,7 +46,7 @@ admin:
 
 proxy:
   enabled: true
-  type: NodePort
+  type: LoadBalancer
   annotations: {}
 
   http:
