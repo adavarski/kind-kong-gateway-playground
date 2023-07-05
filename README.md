@@ -15,19 +15,19 @@ kind create cluster --name=kong-cluster --config=config.yml
 ```
 Note: Example using k3d to create k3d cluster without traefik as default ingress class `k3d cluster create k3s-local --k3s-arg '--no-deploy=traefik@server:*' --k3s-arg '--write-kubeconfig-mode=644@server:*' --servers 3`
 
-#### Create TLS pairs
+### Create TLS pairs
 
 ```
 cd configmap/kong/
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ingress-admin.key -out ingress-admin.crt -subj "/CN=admin.kong.192.168.1.100.nip.io/O=admin.kong.admin.kong.192.168.1.100.nip.io"
 ```
 
-#### Pre-requisites
+### Pre-requisites
 `kubectl create namespace kong` \
 `kubectl create secret generic kong-superuser-password -n kong --from-literal=password=changeit` \ 
 `kubectl create secret tls ingress-admin-tls-secret --key ./configmap/kong/ingress-admin.key --cert ./configmap/kong/ingress-admin.crt -n kong`
 
-#### Install Kong Ingress Controller and Konga UI
+### Install Kong Ingress Controller and Konga UI
 `helm install my-kong kong/kong -n kong --values ./charts/kong/minimal.yml` \
 `helm install konga ./charts/konga -n kong --values ./charts/konga/values.yml` \
 `kubectl delete jobs -n kong --all`
