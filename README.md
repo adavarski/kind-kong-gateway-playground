@@ -84,50 +84,65 @@ kubectl patch deployment -n kong proxy-kong -p '{"spec":{"replicas":1,"template"
 kubectl patch service -n kong kong-proxy -p '{"spec":{"type":"NodePort"}}'
 kubectl patch ingress my-kong-kong-admin -p '{"spec":{"ingressClassName":"kong"}}' -n kong
 
+### Check Ingress:
+$ kubectl get ing -n kong
+NAME                 CLASS   HOSTS                             ADDRESS         PORTS     AGE
+my-kong-kong-admin   kong    admin.kong.192.168.1.100.nip.io   10.96.112.209   80, 443   2m43s
+
 ```
 
 ### Check kong installation
 
 ```
-$ kubectl get all -n kong
+kubectl get all -n kong
 NAME                                     READY   STATUS      RESTARTS   AGE
-pod/konga-58bb6bd9f7-xlzrs               1/1     Running     0          7m51s
-pod/my-kong-kong-8db7f644d-svkhv         1/1     Running     0          8m3s
-pod/my-kong-kong-init-migrations-6hckw   0/1     Completed   0          8m3s
-pod/my-kong-postgresql-0                 1/1     Running     0          8m3s
+pod/ingress-kong-7548b68cb8-l9xpf        1/1     Running     0          103s
+pod/konga-58bb6bd9f7-hkpqf               1/1     Running     0          3m30s
+pod/my-kong-kong-8db7f644d-k64bq         1/1     Running     0          3m30s
+pod/my-kong-kong-init-migrations-wrr77   0/1     Completed   0          3m30s
+pod/my-kong-postgresql-0                 1/1     Running     0          3m30s
+pod/proxy-kong-8d85c874f-4cssx           1/1     Running     0          103s
+pod/proxy-kong-8d85c874f-qcxm4           1/1     Running     0          103s
 
-NAME                            TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                      AGE
-service/konga                   ClusterIP   10.96.136.94   <none>        1337/TCP                     7m51s
-service/my-kong-kong-admin      NodePort    10.96.11.253   <none>        8444:31342/TCP               8m3s
-service/my-kong-kong-proxy      NodePort    10.96.166.5    <none>        80:32417/TCP,443:32598/TCP   8m3s
-service/my-kong-postgresql      ClusterIP   10.96.6.84     <none>        5432/TCP                     8m3s
-service/my-kong-postgresql-hl   ClusterIP   None           <none>        5432/TCP                     8m3s
+NAME                              TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+service/kong-admin                ClusterIP      None            <none>        8444/TCP                     105s
+service/kong-proxy                NodePort       10.96.112.209   <none>        80:32633/TCP,443:30859/TCP   104s
+service/kong-validation-webhook   ClusterIP      10.96.35.199    <none>        443/TCP                      104s
+service/konga                     ClusterIP      10.96.47.167    <none>        1337/TCP                     3m30s
+service/my-kong-kong-admin        NodePort       10.96.243.68    <none>        8444:30447/TCP               3m30s
+service/my-kong-kong-proxy        LoadBalancer   10.96.226.163   <pending>     80:32460/TCP,443:30840/TCP   3m30s
+service/my-kong-postgresql        ClusterIP      10.96.97.49     <none>        5432/TCP                     3m30s
+service/my-kong-postgresql-hl     ClusterIP      None            <none>        5432/TCP                     3m30s
 
 NAME                           READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/konga          1/1     1            1           7m51s
-deployment.apps/my-kong-kong   1/1     1            1           8m3s
+deployment.apps/ingress-kong   1/1     1            1           104s
+deployment.apps/konga          1/1     1            1           3m30s
+deployment.apps/my-kong-kong   1/1     1            1           3m30s
+deployment.apps/proxy-kong     2/2     2            2           103s
 
-NAME                                     DESIRED   CURRENT   READY   AGE
-replicaset.apps/konga-58bb6bd9f7         1         1         1       7m51s
-replicaset.apps/my-kong-kong-8db7f644d   1         1         1       8m3s
+NAME                                      DESIRED   CURRENT   READY   AGE
+replicaset.apps/ingress-kong-7548b68cb8   1         1         1       104s
+replicaset.apps/konga-58bb6bd9f7          1         1         1       3m30s
+replicaset.apps/my-kong-kong-8db7f644d    1         1         1       3m30s
+replicaset.apps/proxy-kong-8d85c874f      2         2         2       103s
 
 NAME                                  READY   AGE
-statefulset.apps/my-kong-postgresql   1/1     8m3s
+statefulset.apps/my-kong-postgresql   1/1     3m30s
 
 NAME                                     COMPLETIONS   DURATION   AGE
-job.batch/my-kong-kong-init-migrations   1/1           110s       8m3s
+job.batch/my-kong-kong-init-migrations   1/1           2m54s      3m30s
+
 
 $ kubectl get ing -n kong
-NAME                 CLASS    HOSTS                             ADDRESS   PORTS     AGE
-my-kong-kong-admin   <none>   admin.kong.192.168.1.100.nip.io             80, 443   8m15s
+NAME                 CLASS   HOSTS                             ADDRESS         PORTS     AGE
+my-kong-kong-admin   kong    admin.kong.192.168.1.100.nip.io   10.96.112.209   80, 443   3m56s
 
 $ HOST=$(kubectl get nodes --namespace kong -o jsonpath='{.items[0].status.addresses[0].address}')
-$ echo $HOST
-172.20.0.3
 $ PORT=$(kubectl get svc --namespace kong my-kong-kong-proxy -o jsonpath='{.spec.ports[0].nodePort}')
-$ echo $PORT
-32417
 $ export PROXY_IP=${HOST}:${PORT}
+$ echo $PROXY_IP
+172.20.0.3:32460
+
 $ curl $PROXY_IP
 {"message":"no Route matched with those values"}
 
@@ -149,10 +164,10 @@ ecdsa.key","nginx_pid":"/kong_prefix/pids/nginx.pid","nginx_err_logs":"/kong_pre
 
 $ export KONG_PROXY_LB=$(kubectl get svc/my-kong-kong-proxy -n kong -o=jsonpath='{.spec.clusterIP}')
 $ echo $KONG_PROXY_LB
-10.96.166.5
+10.96.226.163
 $ export KONG_ADMIN_POD=$(kubectl get pod --selector=app=my-kong-kong -n kong -o=jsonpath='{.items[0].status.podIP}')
 $ echo $KONG_ADMIN_POD
-10.244.2.2
+10.244.1.2
 $ export KONG_GATEWAY_DOMAIN=apigw.kong.192.168.1.100.nip.io
 $ curl https://$KONG_ADMIN_POD:8444
 ^C
@@ -183,10 +198,10 @@ Screenshot:
 
 ```
 $ echo $KONG_ADMIN_POD
-10.244.2.2
+10.244.1.2
 ```
 
-Add New Connection ---> KONG ADMIN URL = https://10.244.2.2:8444
+Add New Connection ---> KONG ADMIN URL = https://10.244.1.2:8444
 
 Screenshots:
 
@@ -205,10 +220,10 @@ Example Output
 ```
 $ export KONG_PROXY_LB=$(kubectl get svc/my-kong-kong-proxy -n kong -o=jsonpath='{.spec.clusterIP}')
 $ echo $KONG_PROXY_LB
-10.96.166.5
+10.96.226.163
 $ export KONG_ADMIN_POD=$(kubectl get pod --selector=app=my-kong-kong -n kong -o=jsonpath='{.items[0].status.podIP}')
 $ echo $KONG_ADMIN_POD
-10.244.2.2
+10.244.1.2
 
 ```
 
