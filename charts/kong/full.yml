@@ -1,0 +1,384 @@
+image:
+  repository: kong
+  tag: "2.7"
+  pullPolicy: IfNotPresent
+
+env:
+  prefix: /kong_prefix/
+  database: postgres
+
+  password:
+    valueFrom:
+      secretKeyRef:
+        name: kong-superuser-password
+        key: password
+
+admin:
+  enabled: true
+  type: NodePort
+  annotations:
+    konghq.com/protocol: "https"
+  tls:
+    enabled: true
+    servicePort: 8444
+    containerPort: 8444
+    parameters:
+    - http2
+
+  ingress:
+    enabled: true
+    tls: ingress-admin-tls-secret
+    hostname: admin.kong.deejiw.com
+    annotations:
+      kubernetes.io/ingress.class: "kong"
+    path: /
+
+status:
+  enabled: true
+  http:
+    enabled: true
+    containerPort: 8100
+    parameters: []
+
+cluster:
+  enabled: false
+  annotations: {}
+  labels: {}
+  tls:
+    enabled: false
+    servicePort: 8005
+    containerPort: 8005
+    parameters: []
+  type: ClusterIP
+
+proxy:
+  enabled: true
+  type: LoadBalancer
+  annotations: {}
+  labels:
+    enable-metrics: "true"
+  http:
+    enabled: true
+    servicePort: 80
+    containerPort: 8000
+    parameters: []
+  tls:
+    enabled: true
+    servicePort: 443
+    containerPort: 8443
+    parameters:
+    - http2
+  stream: {}
+
+  ingress:
+    enabled: false
+    ingressClassName:
+    hostname:
+    annotations: {}
+    path: /
+
+udpProxy:
+  enabled: false
+  type: LoadBalancer
+  annotations: {}
+  labels: {}
+  stream: {}
+
+plugins: {}
+
+secretVolumes: []
+
+migrations:
+  preUpgrade: true
+  postUpgrade: true
+  annotations: {}
+  jobAnnotations: {}
+  backoffLimit:
+  resources: {}
+
+dblessConfig: {}
+
+ingressController:
+  enabled: true
+  image:
+    repository: kong/kubernetes-ingress-controller
+    tag: "2.1"
+    effectiveSemver:
+  args: []
+  watchNamespaces: []
+  env:
+    kong_admin_tls_skip_verify: true
+    # kong_admin_token:
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: kong-superuser-password
+    #       key: password
+    # admin_api_uri: ${KONG_ADMIN_IP}
+  admissionWebhook:
+    enabled: false
+    failurePolicy: Fail
+    port: 8080
+    certificate:
+      provided: false
+  ingressClass: kong
+  ingressClassAnnotations: {}
+  rbac:
+    create: true
+  livenessProbe:
+    httpGet:
+      path: "/healthz"
+      port: 10254
+      scheme: HTTP
+    initialDelaySeconds: 5
+    timeoutSeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    failureThreshold: 3
+  readinessProbe:
+    httpGet:
+      path: "/healthz"
+      port: 10254
+      scheme: HTTP
+    initialDelaySeconds: 5
+    timeoutSeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    failureThreshold: 3
+  resources: {}
+
+postgresql:
+  enabled: true
+  postgresqlUsername: kong
+  postgresqlDatabase: kong
+  service:
+    port: 5432
+
+waitImage:
+  enabled: true
+  pullPolicy: IfNotPresent
+
+updateStrategy:
+  type: RollingUpdate
+    rollingUpdate:
+      maxSurge: "100%"
+      maxUnavailable: "0%"
+
+resources: {}
+
+# readinessProbe for Kong pods
+readinessProbe:
+  httpGet:
+    path: "/status"
+    port: status
+    scheme: HTTP
+  initialDelaySeconds: 5
+  timeoutSeconds: 5
+  periodSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
+
+# livenessProbe for Kong pods
+livenessProbe:
+  httpGet:
+    path: "/status"
+    port: status
+    scheme: HTTP
+  initialDelaySeconds: 5
+  timeoutSeconds: 5
+  periodSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
+
+lifecycle:
+  preStop:
+    exec:
+      # kong quit has a default timeout of 10 seconds
+      command:
+        - kong
+        - quit
+        - '--wait=15'
+
+terminationGracePeriodSeconds: 30
+
+tolerations: []
+
+nodeSelector: {}
+
+podAnnotations: {}
+  # kuma.io/gateway: enabled
+  # traffic.sidecar.istio.io/includeInboundPorts: ""
+  
+podLabels: {}
+
+replicaCount: 1
+
+deploymentAnnotations: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+podDisruptionBudget:
+  enabled: false
+  # maxUnavailable: "50%"
+  # minAvailable: "50%"
+
+podSecurityPolicy:
+  enabled: false
+  spec:
+    privileged: false
+    fsGroup:
+      rule: RunAsAny
+    runAsUser:
+      rule: RunAsAny
+    runAsGroup:
+      rule: RunAsAny
+    seLinux:
+      rule: RunAsAny
+    supplementalGroups:
+      rule: RunAsAny
+    volumes:
+      - 'configMap'
+      - 'secret'
+      - 'emptyDir'
+    allowPrivilegeEscalation: false
+    hostNetwork: false
+    hostIPC: false
+    hostPID: false
+    readOnlyRootFilesystem: true
+
+priorityClassName: ""
+
+securityContext: {}
+
+containerSecurityContext: {}
+
+serviceMonitor:
+  enabled: false
+
+enterprise:
+  enabled: false
+  vitals:
+    enabled: true
+  portal:
+    enabled: false
+  rbac:
+    enabled: false
+    admin_gui_auth: basic-auth
+  # session_conf_secret: kong-session-config
+  # admin_gui_auth_conf_secret: CHANGEME-admin-gui-auth-conf-secret
+  smtp:
+    enabled: false
+    # portal_emails_from: none@example.com
+    # portal_emails_reply_to: none@example.com
+    # admin_emails_from: none@example.com
+    # admin_emails_reply_to: none@example.com
+    # smtp_admin_emails: none@example.com
+    # smtp_host: smtp.example.com
+    # smtp_port: 587
+    # smtp_auth_type: ''
+    # smtp_ssl: nil
+    # smtp_starttls: true
+    # auth:
+      # smtp_username: ''  # e.g. postmaster@example.com
+      # smtp_password_secret: CHANGEME-smtp-password
+  
+manager:
+  enabled: true
+  type: NodePort
+  annotations:
+    konghq.com/protocol: "https"
+  labels: {}
+  http:
+    enabled: false
+  tls:
+    enabled: true
+    servicePort: 8445
+    containerPort: 8445
+    parameters:
+    - http2
+  ingress:
+    enabled: false
+    tls: ingress-manager-tls-secret
+    hostname: manager.kong.deejiw.com
+    annotations: {}
+    path: /
+
+portal:
+  enabled: true
+  type: NodePort
+  annotations:
+    konghq.com/protocol: "https"
+  labels: {}
+  http:
+    enabled: true
+    servicePort: 8003
+    containerPort: 8003
+    parameters: []
+  tls:
+    enabled: true
+    servicePort: 8446
+    containerPort: 8446
+    parameters:
+    - http2
+
+  ingress:
+    enabled: false
+    tls: ingress-portal-tls-secret
+    hostname: portal.kong.deejiw.com
+    annotations:
+      kubernetes.io/ingress.class: "kong"
+    path: /
+
+  externalIPs: []
+
+portalapi:
+  enabled: true
+  type: NodePort
+  annotations:
+    konghq.com/protocol: "https"
+  labels: {}
+
+  http:
+    enabled: true
+    servicePort: 8004
+    containerPort: 8004
+    parameters: []
+
+  tls:
+    enabled: true
+    servicePort: 8447
+    containerPort: 8447
+    parameters:
+    - http2
+
+  ingress:
+    enabled: false
+    tls: ingress-portalapi-tls-secret
+    hostname: portalapi.kong.deejiw.com
+    annotations:
+      kubernetes.io/ingress.class: "kong"
+    path: /
+
+clustertelemetry:
+  enabled: false
+  annotations: {}
+  labels: {}
+  tls:
+    enabled: false
+    servicePort: 8006
+    containerPort: 8006
+    parameters: []
+  type: ClusterIP
+
+extraConfigMaps: []
+
+extraSecrets: []

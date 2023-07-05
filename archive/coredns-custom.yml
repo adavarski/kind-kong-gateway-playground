@@ -1,0 +1,13 @@
+# Should work with k3d>=5.3 && k3s>=1.23
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+  namespace: kube-system
+data:
+  kong.server: |
+    admin.kong.deejiw.com {
+      log
+      cache 30
+      forward . 10.43.25.63:80
+    }
