@@ -159,10 +159,10 @@ Screenshot:
 
 ---> Add New Connections
 
-
+```
 $ echo $KONG_ADMIN_POD
 10.244.2.2
-
+```
 #### Initialize Kong Connection for Konga UI
 `https://$KONG_ADMIN_POD:8444`
 
