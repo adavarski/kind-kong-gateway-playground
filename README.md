@@ -34,10 +34,10 @@ kubectl create secret tls ingress-admin-tls-secret --key ./configmap/kong/ingres
 helm repo add kong https://charts.konghq.com
 helm install my-kong kong/kong -n kong --values ./charts/kong/minimal.yml
 helm install konga ./charts/konga -n kong --values ./charts/konga/values.yml
----> NO execute: kubectl delete jobs -n kong --all
+---> NO execute!: kubectl delete jobs -n kong --all
 ```
 
-Note: Kong proxy (TODO: Fix LoadBalancer and try with k3d)
+Note: Kong proxy (Fix LoadBalancer and try with k3d)
 ```
 charts/kong/minimal.yml
 
@@ -53,15 +53,58 @@ proxy:
   type: LoadBalancer
   annotations: {}
 
+
+$ kubectl get all -n kong
+NAME                                     READY   STATUS      RESTARTS   AGE
+pod/konga-594884cb7c-5hrfx               1/1     Running     0          9m53s
+pod/my-kong-postgresql-0                 1/1     Running     0          10m
+pod/my-kong-kong-init-migrations-wd8fh   0/1     Completed   0          10m
+pod/my-kong-kong-5bbf57dbfd-7n8qz        1/1     Running     0          10m
+
+NAME                            TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)                      AGE
+service/my-kong-postgresql-hl   ClusterIP      None            <none>          5432/TCP                     10m
+service/my-kong-postgresql      ClusterIP      10.43.37.135    <none>          5432/TCP                     10m
+service/my-kong-kong-admin      NodePort       10.43.250.157   <none>          8444:32371/TCP               10m
+service/konga                   ClusterIP      10.43.94.172    <none>          1337/TCP                     9m53s
+service/my-kong-kong-proxy      LoadBalancer   10.43.43.239    192.168.192.2   80:32500/TCP,443:30134/TCP   10m
+
+NAME                           READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/konga          1/1     1            1           9m53s
+deployment.apps/my-kong-kong   1/1     1            1           10m
+
+NAME                                      DESIRED   CURRENT   READY   AGE
+replicaset.apps/konga-594884cb7c          1         1         1       9m53s
+replicaset.apps/my-kong-kong-5bbf57dbfd   1         1         1       10m
+
+NAME                                  READY   AGE
+statefulset.apps/my-kong-postgresql   1/1     10m
+
+NAME                                     COMPLETIONS   DURATION   AGE
+job.batch/my-kong-kong-init-migrations   1/1           4m14s      10m
 $ kubectl get ing -n kong
 NAME                 CLASS    HOSTS                             ADDRESS   PORTS     AGE
-my-kong-kong-admin   <none>   admin.kong.192.168.1.100.nip.io             80, 443   8m15s
+my-kong-kong-admin   <none>   admin.kong.192.168.1.100.nip.io             80, 443   10m
 
-Note: ADDRESS is empty with KinD! (TODO: Fix) 
+Note: ADDRESS is empty with KinD & k3d! (TODO: Fix) 
 ```
 
 Example Output:
 ```
+charts/kong/minimal.yml
+
+proxy:
+  enabled: true
+  type: LoadBalancer
+  annotations: {}
+
+Change to:
+
+proxy:
+  enabled: true
+  type: NodePort
+  annotations: {}
+
+
 $ helm install my-kong kong/kong -n kong --values ./charts/kong/minimal.yml
 coalesce.go:223: warning: destination for kong.proxy.stream is a table. Ignoring non-table value ([])
 coalesce.go:223: warning: destination for kong.proxy.stream is a table. Ignoring non-table value ([])
