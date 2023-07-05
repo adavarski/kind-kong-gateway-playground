@@ -165,9 +165,7 @@ $ echo $KONG_ADMIN_POD
 10.244.2.2
 ```
 
-KONGA ---> Add New Connection
-
-KONG ADMIN URL = https://10.244.2.2:8444
+Add New Connection ---> KONG ADMIN URL = https://10.244.2.2:8444
 
 Screenshots:
 
