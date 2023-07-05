@@ -135,7 +135,7 @@ $ echo $KONG_ADMIN_POD
 $ export KONG_GATEWAY_DOMAIN=apigw.kong.192.168.1.100.nip.io
 $ curl https://$KONG_ADMIN_POD:8444
 ^C
-$ kubectl edit ing/my-kong-kong-admin -n kong```
+$ kubectl edit ing/my-kong-kong-admin -n kong
 $ KONG_ADMIN_LISTEN=localhost:8444
 ```
 
