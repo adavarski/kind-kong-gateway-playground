@@ -38,55 +38,17 @@ helm install konga ./charts/konga -n kong --values ./charts/konga/values.yml
 ---> NO execute!: kubectl delete jobs -n kong --all
 ```
 
-Note: Kong proxy (Fix LoadBalancer and try with k3d)
+Note: Kong proxy (Fix LoadBalancer -> Ref: https://kind.sigs.k8s.io/docs/user/ingress/)
 ```
-charts/kong/minimal.yml
+Note: ADDRESS is empty with KinD
 
-proxy:
-  enabled: true
-  type: NodePort
-  annotations: {}
-
-Change to:
-
-proxy:
-  enabled: true
-  type: LoadBalancer
-  annotations: {}
+kubectl apply -f https://raw.githubusercontent.com/Kong/kubernetes-ingress-controller/master/deploy/single/all-in-one-dbless.yaml
+kubectl patch deployment -n kong proxy-kong -p '{"spec":{"replicas":1,"template":{"spec":{"containers":[{"name":"proxy","ports":[{"containerPort":8e3,"hostPort":80,"name":"proxy","protocol":"TCP"},{"containerPort":8443,"hostPort":443,"name":"proxy-ssl","protocol":"TCP"}]}],"nodeSelector":{"ingress-ready":"true"},"tolerations":[{"key":"node-role.kubernetes.io/control-plane","operator":"Equal","effect":"NoSchedule"},{"key":"node-role.kubernetes.io/master","operator":"Equal","effect":"NoSchedule"}]}}}}'
+kubectl patch service -n kong kong-proxy -p '{"spec":{"type":"NodePort"}}'
+kubectl patch ingress example-ingress -p '{"spec":{"ingressClassName":"kong"}}'
+kubectl patch ingress my-kong-kong-admin -p '{"spec":{"ingressClassName":"kong"}}' -n kong
 
 
-$ kubectl get all -n kong
-NAME                                     READY   STATUS      RESTARTS   AGE
-pod/konga-594884cb7c-5hrfx               1/1     Running     0          9m53s
-pod/my-kong-postgresql-0                 1/1     Running     0          10m
-pod/my-kong-kong-init-migrations-wd8fh   0/1     Completed   0          10m
-pod/my-kong-kong-5bbf57dbfd-7n8qz        1/1     Running     0          10m
-
-NAME                            TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)                      AGE
-service/my-kong-postgresql-hl   ClusterIP      None            <none>          5432/TCP                     10m
-service/my-kong-postgresql      ClusterIP      10.43.37.135    <none>          5432/TCP                     10m
-service/my-kong-kong-admin      NodePort       10.43.250.157   <none>          8444:32371/TCP               10m
-service/konga                   ClusterIP      10.43.94.172    <none>          1337/TCP                     9m53s
-service/my-kong-kong-proxy      LoadBalancer   10.43.43.239    192.168.192.2   80:32500/TCP,443:30134/TCP   10m
-
-NAME                           READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/konga          1/1     1            1           9m53s
-deployment.apps/my-kong-kong   1/1     1            1           10m
-
-NAME                                      DESIRED   CURRENT   READY   AGE
-replicaset.apps/konga-594884cb7c          1         1         1       9m53s
-replicaset.apps/my-kong-kong-5bbf57dbfd   1         1         1       10m
-
-NAME                                  READY   AGE
-statefulset.apps/my-kong-postgresql   1/1     10m
-
-NAME                                     COMPLETIONS   DURATION   AGE
-job.batch/my-kong-kong-init-migrations   1/1           4m14s      10m
-$ kubectl get ing -n kong
-NAME                 CLASS    HOSTS                             ADDRESS   PORTS     AGE
-my-kong-kong-admin   <none>   admin.kong.192.168.1.100.nip.io             80, 443   10m
-
-Note: ADDRESS is empty with KinD & k3d! (TODO: Fix) 
 ```
 
 Example Output:
