@@ -32,6 +32,29 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ingress-admin.key -o
 `helm install konga ./charts/konga -n kong --values ./charts/konga/values.yml` \
 `kubectl delete jobs -n kong --all`
 
+Note: Kong proxy (TODO: Fix LoadBalancer)
+```
+charts/kong/minimal.yml
+
+proxy:
+  enabled: true
+  type: NodePort
+  annotations: {}
+
+Change to:
+
+proxy:
+  enabled: true
+  type: LoadBalancer
+  annotations: {}
+
+$ kubectl get ing -n kong
+NAME                 CLASS    HOSTS                             ADDRESS   PORTS     AGE
+my-kong-kong-admin   <none>   admin.kong.192.168.1.100.nip.io             80, 443   8m15s
+
+Note: ADDRESS is empty! (TODO: Fix) 
+```
+
 Example Output:
 ```
 $ helm install my-kong kong/kong -n kong --values ./charts/kong/minimal.yml
