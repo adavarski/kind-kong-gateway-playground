@@ -1,11 +1,10 @@
 ## Kong API Gateway on KinD
-This guide introduces anyone who is interested in doing local hands-on experience with Kong Gateway on KinD (or k3d) cluster
+This guide introduces anyone who is interested in doing local hands-on experience with Kong Gateway on KinD cluster
 
 ### Dependencies
 
 - [Docker](https://docs.docker.com/engine/install/ubuntu/)
 - [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
-- [k3d](https://k3d.io/#installation)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - [Helm](https://helm.sh/docs/intro/install/)
 
@@ -14,8 +13,6 @@ This guide introduces anyone who is interested in doing local hands-on experienc
 cd kind/
 kind create cluster --name=kong-cluster --config=config.yml
 ```
-Note: Example using k3d to create k3d cluster without traefik as default ingress class `k3d cluster create sandman -p 8888:80@loadbalancer -v /etc/machine-id:/etc/machine-id:ro -v /var/log/journal:/var/log/journal:ro -v /var/run/docker.sock:/var/run/docker.sock --k3s-arg '--disable=traefik@server:0' --agents 0`
-
 ### Create TLS pairs
 
 ```
@@ -37,37 +34,8 @@ helm install my-kong kong/kong -n kong --values ./charts/kong/minimal.yml
 helm install konga ./charts/konga -n kong --values ./charts/konga/values.yml
 ---> NO execute!: kubectl delete jobs -n kong --all
 ```
-
-Note: Kong proxy (Fix LoadBalancer -> Ref: https://kind.sigs.k8s.io/docs/user/ingress/)
-```
-Note: ADDRESS is empty with KinD
-
-kubectl apply -f https://raw.githubusercontent.com/Kong/kubernetes-ingress-controller/master/deploy/single/all-in-one-dbless.yaml
-kubectl patch deployment -n kong proxy-kong -p '{"spec":{"replicas":1,"template":{"spec":{"containers":[{"name":"proxy","ports":[{"containerPort":8e3,"hostPort":80,"name":"proxy","protocol":"TCP"},{"containerPort":8443,"hostPort":443,"name":"proxy-ssl","protocol":"TCP"}]}],"nodeSelector":{"ingress-ready":"true"},"tolerations":[{"key":"node-role.kubernetes.io/control-plane","operator":"Equal","effect":"NoSchedule"},{"key":"node-role.kubernetes.io/master","operator":"Equal","effect":"NoSchedule"}]}}}}'
-kubectl patch service -n kong kong-proxy -p '{"spec":{"type":"NodePort"}}'
-kubectl patch ingress example-ingress -p '{"spec":{"ingressClassName":"kong"}}'
-kubectl patch ingress my-kong-kong-admin -p '{"spec":{"ingressClassName":"kong"}}' -n kong
-
-
-```
-
 Example Output:
 ```
-charts/kong/minimal.yml
-
-proxy:
-  enabled: true
-  type: LoadBalancer
-  annotations: {}
-
-Change to:
-
-proxy:
-  enabled: true
-  type: NodePort
-  annotations: {}
-
-
 $ helm install my-kong kong/kong -n kong --values ./charts/kong/minimal.yml
 coalesce.go:223: warning: destination for kong.proxy.stream is a table. Ignoring non-table value ([])
 coalesce.go:223: warning: destination for kong.proxy.stream is a table. Ignoring non-table value ([])
@@ -99,6 +67,25 @@ NOTES:
   echo "Visit http://127.0.0.1:8080 to use your application"
   kubectl port-forward $POD_NAME 8080:80
 ```
+
+### Kong Ingress fix
+```
+```
+$ kubectl get ing -n kong
+NAME                 CLASS    HOSTS                             ADDRESS   PORTS     AGE
+my-kong-kong-admin   <none>   admin.kong.192.168.1.100.nip.io             80, 443   35s
+```
+Note: ADDRESS is empty!!!
+
+Fix: Ref: https://kind.sigs.k8s.io/docs/user/ingress/
+
+kubectl apply -f https://raw.githubusercontent.com/Kong/kubernetes-ingress-controller/master/deploy/single/all-in-one-dbless.yaml
+kubectl patch deployment -n kong proxy-kong -p '{"spec":{"replicas":1,"template":{"spec":{"containers":[{"name":"proxy","ports":[{"containerPort":8e3,"hostPort":80,"name":"proxy","protocol":"TCP"},{"containerPort":8443,"hostPort":443,"name":"proxy-ssl","protocol":"TCP"}]}],"nodeSelector":{"ingress-ready":"true"},"tolerations":[{"key":"node-role.kubernetes.io/control-plane","operator":"Equal","effect":"NoSchedule"},{"key":"node-role.kubernetes.io/master","operator":"Equal","effect":"NoSchedule"}]}}}}'
+kubectl patch service -n kong kong-proxy -p '{"spec":{"type":"NodePort"}}'
+kubectl patch ingress my-kong-kong-admin -p '{"spec":{"ingressClassName":"kong"}}' -n kong
+
+```
+
 ### Check kong installation
 
 ```
