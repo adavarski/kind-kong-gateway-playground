@@ -13,7 +13,7 @@ This guide introduces anyone who is interested in doing local hands-on experienc
 cd kind/
 kind create cluster --name=kong-cluster --config=config.yml
 ```
-Note: Example using k3d to create k3d cluster without traefik as default ingress class `k3d cluster create k3s-local --k3s-arg '--no-deploy=traefik@server:*' --k3s-arg '--write-kubeconfig-mode=644@server:*' --servers 3`
+Note: Example using k3d to create k3d cluster without traefik as default ingress class `k3d cluster create sandman -p 8888:80@loadbalancer -v /etc/machine-id:/etc/machine-id:ro -v /var/log/journal:/var/log/journal:ro -v /var/run/docker.sock:/var/run/docker.sock --k3s-arg '--disable=traefik@server:0' --agents 0`
 
 ### Create TLS pairs
 
