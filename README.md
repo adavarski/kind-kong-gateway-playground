@@ -157,21 +157,20 @@ Screenshot:
 
 <img src="screenshots/Konga-UI-create-admin.png?raw=true" width="1000">
 
----> Add New Connections
+
+#### Initialize Kong Connection for Konga UI
 
 ```
 $ echo $KONG_ADMIN_POD
 10.244.2.2
 ```
-#### Initialize Kong Connection for Konga UI
-`https://$KONG_ADMIN_POD:8444`
-
 
 KONGA ---> Add New Connection
 
 KONG ADMIN URL = https://10.244.2.2:8444
 
 Screenshots:
+
 <img src="screenshots/Konga-UI-all-CONNECTIONS.png?raw=true" width="1000">
 
 <img src="screenshots/Konga-UI-CONNECTIONS.png?raw=true" width="1000">
@@ -228,5 +227,5 @@ NodeHosts: \
 `$KONG_PROXY_LB $KONG_GATEWAY_DOMAIN`
 
 #### HTTP and HTTPS Connectivity Testing
-`kubectl exec -it my-kong-postgresql-0 -n kong -- curl http://apigw.kong.deejiw.com/echo/foo` \
-`kubectl exec -it my-kong-postgresql-0 -n kong -- curl -k https://apigw.kong.deejiw.com/echo/foo`
+`kubectl exec -it my-kong-postgresql-0 -n kong -- curl http://apigw.kong.192.168.1.100.nip.io/echo/foo` \
+`kubectl exec -it my-kong-postgresql-0 -n kong -- curl -k https://apigw.kong.192.168.1.100.nip.io/echo/foo`
