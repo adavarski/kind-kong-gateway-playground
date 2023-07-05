@@ -28,7 +28,7 @@ admin:
   ingress:
     enabled: true
     tls: ingress-admin-tls-secret
-    hostname: admin.kong.deejiw.com
+    hostname: admin.kong.192.168.1.100.nip.io
     annotations:
       kubernetes.io/ingress.class: "kong"
     path: /
@@ -308,7 +308,7 @@ manager:
   ingress:
     enabled: false
     tls: ingress-manager-tls-secret
-    hostname: manager.kong.deejiw.com
+    hostname: manager.kong.192.168.1.100.nip.io
     annotations: {}
     path: /
 
@@ -333,7 +333,7 @@ portal:
   ingress:
     enabled: false
     tls: ingress-portal-tls-secret
-    hostname: portal.kong.deejiw.com
+    hostname: portal.kong.192.168.1.100.nip.io
     annotations:
       kubernetes.io/ingress.class: "kong"
     path: /
@@ -363,7 +363,7 @@ portalapi:
   ingress:
     enabled: false
     tls: ingress-portalapi-tls-secret
-    hostname: portalapi.kong.deejiw.com
+    hostname: portalapi.kong.192.168.1.100.nip.io
     annotations:
       kubernetes.io/ingress.class: "kong"
     path: /
