@@ -1,4 +1,4 @@
-## Kong Gateway on k3d
+## Kong Gateway on KinD
 This guide introduces anyone who is interested in doing local hands-on experience with Kong Gateway on KinD (or k3d) cluster
 
 ### Dependencies
