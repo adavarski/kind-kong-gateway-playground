@@ -155,6 +155,7 @@ Browser -> Konga UI : http://127.0.0.1:8080 -> Create admin user
 
 Screenshot:
 
+<img src="screenshots/Konga-UI-create-admin.png?raw=true" width="1000">
 
 ---> Add New Connections
 
@@ -171,7 +172,9 @@ KONGA ---> Add New Connection
 KONG ADMIN URL = https://10.244.2.2:8444
 
 Screenshots:
+<img src="screenshots/Konga-UI-all-CONNECTIONS.png?raw=true" width="1000">
 
+<img src="screenshots/Konga-UI-CONNECTIONS.png?raw=true" width="1000">
 
 #### Apply echo pod/service for demonstration
 `kubectl apply -f ./manifests/echo.yml`
@@ -209,6 +212,12 @@ Path: /echo/foo
 
 
 Screenshots:
+
+<img src="screenshots/Konga-UI-service.png?raw=true" width="1000">
+
+<img src="screenshots/Kong-UI-route.png?raw=true" width="1000">
+
+
 
 #### Add DNS for Kong Proxy LB
 `kubectl edit cm/coredns -n kube-system` \
