@@ -57,7 +57,7 @@ $ kubectl get ing -n kong
 NAME                 CLASS    HOSTS                             ADDRESS   PORTS     AGE
 my-kong-kong-admin   <none>   admin.kong.192.168.1.100.nip.io             80, 443   8m15s
 
-Note: ADDRESS is empty! (TODO: Fix) 
+Note: ADDRESS is empty with KinD! (TODO: Fix) 
 ```
 
 Example Output:
