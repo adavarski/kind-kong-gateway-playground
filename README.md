@@ -30,6 +30,7 @@ kubectl create secret tls ingress-admin-tls-secret --key ./configmap/kong/ingres
 ```
 
 ### Install Kong Ingress Controller and Konga UI
+`helm repo add kong https://charts.konghq.com`
 `helm install my-kong kong/kong -n kong --values ./charts/kong/minimal.yml` \
 `helm install konga ./charts/konga -n kong --values ./charts/konga/values.yml` \
 `kubectl delete jobs -n kong --all`
