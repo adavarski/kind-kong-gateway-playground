@@ -34,7 +34,7 @@ kubectl create secret tls ingress-admin-tls-secret --key ./configmap/kong/ingres
 helm repo add kong https://charts.konghq.com
 helm install my-kong kong/kong -n kong --values ./charts/kong/minimal.yml
 helm install konga ./charts/konga -n kong --values ./charts/konga/values.yml
-kubectl delete jobs -n kong --all
+---> NO execute: kubectl delete jobs -n kong --all
 ```
 
 Note: Kong proxy (TODO: Fix LoadBalancer and try with k3d)
