@@ -205,9 +205,10 @@ Add New Connection ---> KONG ADMIN URL = https://10.244.1.2:8444
 
 Screenshots:
 
-<img src="screenshots/Konga-UI-all-CONNECTIONS.png?raw=true" width="1000">
 
-<img src="screenshots/Konga-UI-CONNECTIONS.png?raw=true" width="1000">
+<img src="screenshots/Konga-UI-Connections.png?raw=true" width="1000">
+
+<img src="screenshots/Konga-UI-DASHBOARD.png?raw=true" width="1000">
 
 #### Apply echo pod/service for demonstration
 `kubectl apply -f ./manifests/echo.yml`
