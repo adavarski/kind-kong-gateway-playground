@@ -23,9 +23,11 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ingress-admin.key -o
 ```
 
 ### Pre-requisites
-`kubectl create namespace kong` \
-`kubectl create secret generic kong-superuser-password -n kong --from-literal=password=changeit` \ 
-`kubectl create secret tls ingress-admin-tls-secret --key ./configmap/kong/ingress-admin.key --cert ./configmap/kong/ingress-admin.crt -n kong`
+```
+kubectl create namespace kong
+kubectl create secret generic kong-superuser-password -n kong --from-literal=password=changeit
+kubectl create secret tls ingress-admin-tls-secret --key ./configmap/kong/ingress-admin.key --cert ./configmap/kong/ingress-admin.crt -n kong
+```
 
 ### Install Kong Ingress Controller and Konga UI
 `helm install my-kong kong/kong -n kong --values ./charts/kong/minimal.yml` \
