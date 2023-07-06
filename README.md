@@ -276,3 +276,12 @@ NodeHosts: \
 #### HTTP and HTTPS Connectivity Testing
 `kubectl exec -it my-kong-postgresql-0 -n kong -- curl http://apigw.kong.192.168.1.100.nip.io/echo/foo` \
 `kubectl exec -it my-kong-postgresql-0 -n kong -- curl -k https://apigw.kong.192.168.1.100.nip.io/echo/foo`
+
+### Some features of Kong Ingress Controller and Kong Gateway:
+
+- Proxy service by Kong
+- Protect API by API Key
+- Limit API traffic
+- Restrict IP Addresses of API consumer
+- Setup Backend Services Health Check and Circuit-Breaker
+
