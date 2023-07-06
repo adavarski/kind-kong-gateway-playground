@@ -33,6 +33,17 @@ helm repo add kong https://charts.konghq.com
 helm install my-kong kong/kong -n kong --values ./charts/kong/minimal.yml
 helm install konga ./charts/konga -n kong --values ./charts/konga/values.yml
 ---> NO execute! (db migration needed on init kong): kubectl delete jobs -n kong --all
+
+### Note:  We can install Kong Api gateway this way without step to setup TLS certs: 
+$ helm install api-gateway -n kong kong/kong \
+  --set ingressController.installCRDs=false \
+  --set admin.enabled=true \
+  --set admin.type=ClusterIP \
+  --set admin.http.enabled=true \
+  --set admin.tls.enabled=false \
+  --set env.database=postgres \
+  --set postgresql.enabled=true
+
 ```
 Example Output:
 ```
