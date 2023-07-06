@@ -42,7 +42,7 @@ metadata:
 spec:
   ingressClassName: "kong"
   rules:
-    - host: localhost
+    - host: whoami.192.168.1.100.nip.io
       http:
         paths:
           - pathType: Prefix
