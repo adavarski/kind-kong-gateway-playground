@@ -313,3 +313,7 @@ NodeHosts: \
 - Restrict IP Addresses of API consumer
 - Setup Backend Services Health Check and Circuit-Breaker
 
+### Clean env:
+```
+kind delete cluster --name=kong-cluster
+```
