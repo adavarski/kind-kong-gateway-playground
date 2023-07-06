@@ -262,6 +262,7 @@ Screenshots:
 
 <img src="screenshots/Kong-UI-route.png?raw=true" width="1000">
 
+<img src="screenshots/Konga-UI-add-route.png?raw=true" width="1000">
 
 
 #### Add DNS for Kong Proxy LB
