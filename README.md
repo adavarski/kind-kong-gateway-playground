@@ -239,7 +239,7 @@ Host: echo.default \
 Port: 80 \
 Path: /foo \
 
-__Route__
+__Route__ (Note: ENTER when setup path and hosts)
 Name: echo-foo-route \
 Hosts: `$KONG_GATEWAY_DOMAIN` \
 Path: /echo/foo
